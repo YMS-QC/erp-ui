@@ -52,7 +52,7 @@ export function CommandMenu({ ...props }: DialogProps) {
                 {...props}
             >
                 <span className="hidden lg:inline-flex">切换应用 ...</span>
-                <span className="inline-flex lg:hidden">搜索 ...</span>
+                <span className="inline-flex lg:hidden">切换应用 ...</span>
                 <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
                     <span className="text-xs">⌘</span>K
                 </kbd>
