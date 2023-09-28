@@ -1,5 +1,5 @@
 export const siteConfig = {
-    name: 'ERP/UI',
+    name: 'ERP-UI',
     url: '',
     ogImage: '',
     description: '',

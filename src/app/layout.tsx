@@ -22,7 +22,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         disableTransitionOnChange
                     >
                         <SiteHeader />
-                        {/* <Menu /> */}
                         {children}
                     </ThemeProvider>
                 </div>

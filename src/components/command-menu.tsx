@@ -51,14 +51,14 @@ export function CommandMenu({ ...props }: DialogProps) {
                 onClick={() => setOpen(true)}
                 {...props}
             >
-                <span className="hidden lg:inline-flex">Search documentation...</span>
-                <span className="inline-flex lg:hidden">Search...</span>
+                <span className="hidden lg:inline-flex">切换应用 ...</span>
+                <span className="inline-flex lg:hidden">搜索 ...</span>
                 <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
                     <span className="text-xs">⌘</span>K
                 </kbd>
             </Button>
             <CommandDialog open={open} onOpenChange={setOpen}>
-                <CommandInput placeholder="Type a command or search..." />
+                <CommandInput placeholder="输入命令或转到..." />
                 <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
                     <CommandGroup heading="Links">
@@ -96,18 +96,18 @@ export function CommandMenu({ ...props }: DialogProps) {
                         </CommandGroup>
                     ))}
                     <CommandSeparator />
-                    <CommandGroup heading="Theme">
+                    <CommandGroup heading="切换主题">
                         <CommandItem onSelect={() => runCommand(() => setTheme('light'))}>
                             <SunIcon className="mr-2 h-4 w-4" />
-                            Light
+                            明亮模式
                         </CommandItem>
                         <CommandItem onSelect={() => runCommand(() => setTheme('dark'))}>
                             <MoonIcon className="mr-2 h-4 w-4" />
-                            Dark
+                            黑暗模式
                         </CommandItem>
                         <CommandItem onSelect={() => runCommand(() => setTheme('system'))}>
                             <LaptopIcon className="mr-2 h-4 w-4" />
-                            System
+                            跟随系统
                         </CommandItem>
                     </CommandGroup>
                 </CommandList>

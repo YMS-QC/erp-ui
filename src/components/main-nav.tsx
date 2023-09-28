@@ -13,9 +13,14 @@ export function MainNav() {
     return (
         <div className="hidden md:flex md:items-center md:justify-between">
             <Link href="/" className="mr-6 px-3 flex items-center">
-                <span className="hidden font-bold sm:inline-block">{siteConfig.name}</span>
+                <span className="hidden font-bold text-primary sm:inline-block">
+                    {siteConfig.name}
+                </span>
             </Link>
             <nav className="flex items-center space-x-6 text-sm font-medium">
+                {/* <div className="w-full flex-1 md:w-auto md:flex-none">
+                    <CommandMenu />
+                </div> */}
                 {/* <Link
                     href="/docs"
                     className={cn(
