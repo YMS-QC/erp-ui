@@ -104,9 +104,6 @@ dependencies:
   dayjs:
     specifier: ^1.11.10
     version: registry.npmmirror.com/dayjs@1.11.10
-  lucide-react:
-    specifier: ^0.279.0
-    version: registry.npmmirror.com/lucide-react@0.279.0(react@18.2.0)
   next:
     specifier: latest
     version: registry.npmmirror.com/next@13.5.3(react-dom@18.2.0)(react@18.2.0)
@@ -4377,17 +4374,6 @@ packages:
     dependencies:
       yallist: registry.npmmirror.com/yallist@4.0.0
     dev: true
-
-  registry.npmmirror.com/lucide-react@0.279.0(react@18.2.0):
-    resolution: {integrity: sha512-LJ8g66+Bxc3t3x9vKTeK3wn3xucrOQGfJ9ou9GsBwCt2offsrT2BB90XrTrIzE1noYYDe2O8jZaRHi6sAHXNxw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/lucide-react/-/lucide-react-0.279.0.tgz}
-    id: registry.npmmirror.com/lucide-react/0.279.0
-    name: lucide-react
-    version: 0.279.0
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0
-    dependencies:
-      react: registry.npmmirror.com/react@18.2.0
-    dev: false
 
   registry.npmmirror.com/merge-stream@2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/merge-stream/-/merge-stream-2.0.0.tgz}
