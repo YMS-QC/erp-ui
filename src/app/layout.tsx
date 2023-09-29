@@ -1,20 +1,30 @@
-import { Inter } from 'next/font/google';
+import { Noto_Sans } from 'next/font/google';
 
 import { SiteHeader } from '@/components/site-header';
 import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/toaster';
 
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const Noto = Noto_Sans({
+    weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+    style: 'normal',
+    preload: true,
+    fallback: ['Microsoft YaHei', 'PingFang SC'],
+    adjustFontFallback: true,
+    subsets: ['cyrillic', 'latin', 'latin-ext', 'vietnamese'],
+    variable: '--font-noto-mono',
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en">
-            <body className={inter.className}>
-                <div className="h-screen -z-50">
+        <html lang="en" className={`${Noto.variable}`}>
+            <body>
+                <div className="h-screen container font-sans">
                     <ThemeProvider attribute="class" defaultTheme="system">
                         <SiteHeader />
                         {children}
+                        <Toaster />
                     </ThemeProvider>
                 </div>
             </body>

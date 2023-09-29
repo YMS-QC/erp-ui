@@ -21,13 +21,15 @@ const BasicDataLayout = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <div className="bg-background">
-            <div className="grid md:grid-cols-5 lg:grid-cols-6 w-full h-max">
+            <div className="grid md:grid-cols-5 lg:grid-cols-7 w-full h-max">
                 <Sidebar
                     sideTitle={sideTitle}
                     itemList={itemList}
-                    className="hidden md:flex md:col-span-1 lg:col-span-1 md:border-r h-max w-max space-y-4 py-2 "
+                    className="hidden md:flex md:col-span-1 h-full w-full space-y-4 py-2 "
                 />
-                <div className="flex h-max space-y-4 py-2 pl-1">{children}</div>
+                <div className="h-full space-y-4 py-2 md:col-start-2 md:col-end-6 lg:col-end-8">
+                    {children}
+                </div>
             </div>
         </div>
     );
