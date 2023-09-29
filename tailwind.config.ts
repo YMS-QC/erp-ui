@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     darkMode: ['class'],
@@ -10,16 +11,12 @@ module.exports = {
     theme: {
         container: {
             center: true,
-            padding: '1px',
+            padding: '.5rem',
             screens: {
                 '2xl': '1920px',
             },
         },
         extend: {
-            fontFamily: {
-                sans: ['var(--font-noto-mono)'],
-                mono: ['var(--font-noto-mono)'],
-            },
             colors: {
                 border: 'hsl(var(--border))',
                 input: 'hsl(var(--input))',
@@ -76,6 +73,5 @@ module.exports = {
             },
         },
     },
-    // eslint-disable-next-line global-require
     plugins: [require('tailwindcss-animate')],
 };
