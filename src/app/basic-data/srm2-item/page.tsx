@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ToastSimple } from '@/app/basic-data/srm2-item/toast';
+import { SettingsForm } from '@/app/basic-data/srm2-item/settings-form';
 
 const BasicDataHomePage = ({ params }: { params: { slug: string[] } }) => {
     return (
@@ -16,7 +16,7 @@ const BasicDataHomePage = ({ params }: { params: { slug: string[] } }) => {
             </div>
             <div>
                 <TabsContent value="settings" className="space-y-4 flex-glow">
-                    <ToastSimple />
+                    <SettingsForm />
                 </TabsContent>
                 <TabsContent value="query" className="space-y-4 flex-glow" />
                 <TabsContent value="history" className="space-y-4 flex-glow" />
