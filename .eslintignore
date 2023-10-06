@@ -25,4 +25,3 @@ yarn-error.log
 **/*.html
 **/*.png
 **/*.toml
-/src/components/ui/
