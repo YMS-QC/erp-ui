@@ -42,10 +42,12 @@ const FormSchema = z.object({
         .min(dayjs().add(-30, 'day').toDate(), { message: '开始日期不能早于30天前' })
         .optional(),
     dateTo: z.date().optional(),
-    maxUpdateRows: z.number().default(1000).optional(),
+    // coerce 强制类型装换校验，可以解决select的value是string类型的问题
+    maxUpdateRows: z.coerce.number().default(1000).optional(),
+    transportRowLimit: z.coerce.number().default(10).optional(),
 });
 
-export function SettingsForm() {
+export function ProfileTab() {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
     });
@@ -56,6 +58,25 @@ export function SettingsForm() {
             description: (
                 <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4 z-50">
                     <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+                </pre>
+            ),
+        });
+    }
+
+    async function handleStop(e: any) {
+        e.preventDefault();
+        const res = await fetch('http://localhost:3000/basic-data/srm2-item/api/restart', {
+            method: 'GET',
+        });
+        const data = await res.json();
+
+        toast({
+            title: '点击【停止推送】',
+            description: (
+                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4 z-50">
+                    <code className="text-white">{`点击了停止推送按钮${JSON.stringify(
+                        data,
+                    )}`}</code>
                 </pre>
             ),
         });
@@ -210,11 +231,14 @@ export function SettingsForm() {
                 <div className="space-y-6 pt-2 pb-6">
                     <FormField
                         control={form.control}
-                        name="maxUpdateRows"
+                        name="transportRowLimit"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>单次推送条数</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue="10">
+                                <Select
+                                    onValueChange={(val) => field.onChange(Number(val))}
+                                    defaultValue="10"
+                                >
                                     <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="最大更新条数" />
@@ -235,8 +259,11 @@ export function SettingsForm() {
                     />
                 </div>
 
-                <div className="py-6">
-                    <Button type="submit">提交</Button>
+                <div className="py-6 flex justify-end space-x-2">
+                    <Button type="submit">更新配置</Button>
+                    <Button variant="outline" onClick={(e) => handleStop(e)}>
+                        停止推送
+                    </Button>
                 </div>
             </form>
         </Form>

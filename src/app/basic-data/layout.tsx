@@ -19,6 +19,13 @@ const BasicDataLayout = ({ children }: { children: React.ReactNode }) => {
 
     // console.log(slug);
 
+    // const api = axios.create({
+    //     // baseURL: 'http://localhost:3000/basic-data/api/',
+    //     baseURL: 'https://pokeapi.co/api/v2/',
+    // });
+
+    // const fetcher = (url: string) => api.get(url).then((res) => res.data);
+
     return (
         <div className="bg-background">
             <div className="grid md:grid-cols-5 lg:grid-cols-7 w-full h-max">

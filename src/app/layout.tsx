@@ -3,6 +3,7 @@ import { Noto_Sans } from 'next/font/google';
 import { SiteHeader } from '@/components/site-header';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
+import AuthProvider from '@/app/auth/auth-provider';
 
 import './globals.css';
 
@@ -21,11 +22,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="en" className={`${Noto.variable}`}>
             <body>
                 <div className="h-screen container font-sans">
-                    <ThemeProvider attribute="class" defaultTheme="system">
-                        <SiteHeader />
-                        {children}
-                        <Toaster />
-                    </ThemeProvider>
+                    <AuthProvider>
+                        <ThemeProvider attribute="class" defaultTheme="system">
+                            <SiteHeader />
+                            {children}
+                            <Toaster />
+                        </ThemeProvider>
+                    </AuthProvider>
                 </div>
             </body>
         </html>
