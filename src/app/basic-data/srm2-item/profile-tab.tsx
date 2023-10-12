@@ -7,9 +7,13 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import dayjs from 'dayjs';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { CalendarIcon } from '@radix-ui/react-icons';
+
+import { signOut, useSession } from 'next-auth/react';
+
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -36,7 +40,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 
 const FormSchema = z.object({
-    lookBackDays: z.number().min(1, { message: '至少回溯一天' }).optional(),
+    lookBackDays: z.coerce.number().min(1, { message: '至少回溯一天' }).optional(),
     dateFrom: z
         .date()
         .min(dayjs().add(-30, 'day').toDate(), { message: '开始日期不能早于30天前' })
@@ -48,38 +52,106 @@ const FormSchema = z.object({
 });
 
 export function ProfileTab() {
+    const router = useRouter();
+    const { data: session }: { data: any } = useSession();
+    const [isLoading, setIsLoading] = useState(false);
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
     });
 
-    function onSubmit(data: z.infer<typeof FormSchema>) {
-        toast({
-            title: '你提交了以下的值:',
-            description: (
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4 z-50">
-                    <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-                </pre>
-            ),
-        });
+    async function onSubmit(formData: z.infer<typeof FormSchema>) {
+        const getResponse = async () => {
+            try {
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/basic-data/srm2/item/start`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            authorization: `Bearer ${session?.backendTokens?.accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    },
+                );
+                const json = await res.json();
+
+                return json;
+            } catch (error: any) {
+                return { statusCode: error.code, message: error.message };
+            }
+        };
+
+        setIsLoading(true);
+
+        const data = await getResponse();
+
+        setIsLoading(false);
+
+        if (data.statusCode === 200)
+            toast({
+                title: '成功！',
+            });
+        else if (data.statusCode === 401) {
+            toast({
+                title: '会话过期需要重新登录',
+            });
+            router.replace('/basic-data/srm2-item');
+            router.push('/auth/signin');
+        } else
+            toast({
+                title: '处理失败！',
+                variant: 'destructive',
+                description: <p>{data.message}</p>,
+            });
     }
 
     async function handleStop(e: any) {
         e.preventDefault();
-        const res = await fetch('http://localhost:3000/basic-data/srm2-item/api/restart', {
-            method: 'GET',
-        });
-        const data = await res.json();
 
-        toast({
-            title: '点击【停止推送】',
-            description: (
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4 z-50">
-                    <code className="text-white">{`点击了停止推送按钮${JSON.stringify(
-                        data,
-                    )}`}</code>
-                </pre>
-            ),
-        });
+        // console.log(session);
+
+        const getResponse = async () => {
+            try {
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/basic-data/srm2/item/stop`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            authorization: `Bearer ${session?.backendTokens?.accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    },
+                );
+                const json = await res.json();
+
+                return json;
+            } catch (error: any) {
+                return { statusCode: error.code, message: error.message };
+            }
+        };
+
+        setIsLoading(true);
+
+        const data = await getResponse();
+
+        setIsLoading(false);
+
+        if (data.statusCode === 200)
+            toast({
+                title: '成功！',
+            });
+        else if (data.statusCode === 401) {
+            toast({
+                title: '会话过期需要重新登录',
+            });
+            signOut();
+        } else
+            toast({
+                title: '处理失败！',
+                variant: 'destructive',
+                description: <p>{data.message}</p>,
+            });
     }
 
     return (
@@ -88,30 +160,6 @@ export function ProfileTab() {
                 <Label className="text-lg">扫描配置</Label>
                 <Separator />
                 <div className="space-y-6 pt-2 pb-6">
-                    <FormField
-                        control={form.control}
-                        name="lookBackDays"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>回溯天数</FormLabel>
-                                <Select onValueChange={field.onChange}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="选择回溯天数" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {Array.from(Array(7).keys()).map((i) => (
-                                            <SelectItem value={String(i + 1)}>{i + 1}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormDescription>控制往前扫描多少天的数据</FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
                     <FormField
                         control={form.control}
                         name="dateFrom"
@@ -149,7 +197,9 @@ export function ProfileTab() {
                                         />
                                     </PopoverContent>
                                 </Popover>
-                                <FormDescription>选择扫描开始日期</FormDescription>
+                                <FormDescription>
+                                    可不填，填写后指定从该日期开始扫描更新的数据，默认回溯一天
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -192,7 +242,9 @@ export function ProfileTab() {
                                         />
                                     </PopoverContent>
                                 </Popover>
-                                <FormDescription>选择扫描截至日期</FormDescription>
+                                <FormDescription>
+                                    可不填，填写后将指定扫描截至日期,默认到当前时间
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -260,8 +312,10 @@ export function ProfileTab() {
                 </div>
 
                 <div className="py-6 flex justify-end space-x-2">
-                    <Button type="submit">更新配置</Button>
-                    <Button variant="outline" onClick={(e) => handleStop(e)}>
+                    <Button type="submit" loading={isLoading}>
+                        更新配置
+                    </Button>
+                    <Button variant="outline" loading={isLoading} onClick={(e) => handleStop(e)}>
                         停止推送
                     </Button>
                 </div>

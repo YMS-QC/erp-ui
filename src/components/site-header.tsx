@@ -1,4 +1,5 @@
 import { CommandMenu } from '@/components/command-menu';
+import LogButton from '@/components/log-toggle';
 import { LeftSideSheet } from '@/components/left-side-sheet';
 import { MainNav } from '@/components/main-nav';
 import { ModeToggle } from '@/components/mode-toggle';
@@ -13,8 +14,9 @@ export function SiteHeader() {
                     <div className="w-full flex-1 md:w-auto md:flex-none">
                         <CommandMenu />
                     </div>
-                    <nav className="flex items-center">
+                    <nav className="flex items-center space-x-2">
                         <ModeToggle />
+                        <LogButton />
                     </nav>
                 </div>
             </div>
