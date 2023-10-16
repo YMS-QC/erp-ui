@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 
 import { CalendarIcon } from '@radix-ui/react-icons';
 
-import { signOut, useSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 
 import { useRouter } from 'next/navigation';
 
@@ -38,12 +38,17 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { Slider } from '@/components/ui/slider';
 
 const FormSchema = z.object({
-    lookBackDays: z.coerce.number().min(1, { message: '至少回溯一天' }).optional(),
+    lookBackDays: z
+        .number()
+        .min(1, { message: '至少回溯一天' })
+        .max(100, { message: '不能超过100天' })
+        .default(7),
     dateFrom: z
         .date()
-        .min(dayjs().add(-30, 'day').toDate(), { message: '开始日期不能早于30天前' })
+        .min(dayjs().add(-100, 'day').toDate(), { message: '开始日期不能早于100天前' })
         .optional(),
     dateTo: z.date().optional(),
     // coerce 强制类型装换校验，可以解决select的value是string类型的问题
@@ -58,6 +63,9 @@ export function ProfileTab() {
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
+        defaultValues: {
+            lookBackDays: 7,
+        },
     });
 
     async function onSubmit(formData: z.infer<typeof FormSchema>) {
@@ -96,8 +104,9 @@ export function ProfileTab() {
             toast({
                 title: '会话过期需要重新登录',
             });
-            router.replace('/basic-data/srm2-item');
-            router.push('/auth/signin');
+            // router.replace('/basic-data/srm2-item');
+            // router.push('/auth/signin');
+            signIn();
         } else
             toast({
                 title: '处理失败！',
@@ -109,7 +118,7 @@ export function ProfileTab() {
     async function handleStop(e: any) {
         e.preventDefault();
 
-        // console.log(session);
+        console.log(session);
 
         const getResponse = async () => {
             try {
@@ -145,7 +154,8 @@ export function ProfileTab() {
             toast({
                 title: '会话过期需要重新登录',
             });
-            signOut();
+            router.replace('/basic-data/srm2-item');
+            router.push('/auth/signin');
         } else
             toast({
                 title: '处理失败！',
@@ -160,6 +170,28 @@ export function ProfileTab() {
                 <Label className="text-lg">扫描配置</Label>
                 <Separator />
                 <div className="space-y-6 pt-2 pb-6">
+                    <FormField
+                        control={form.control}
+                        name="lookBackDays"
+                        render={({ field: { value, onChange } }) => (
+                            <FormItem>
+                                <FormLabel>回溯{value}天</FormLabel>
+                                <FormControl>
+                                    <Slider
+                                        min={1}
+                                        max={100}
+                                        step={1}
+                                        defaultValue={[value]}
+                                        onValueChange={(vals) => {
+                                            onChange(vals[0]);
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormDescription>从{value}天开始扫描更新的数据</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <FormField
                         control={form.control}
                         name="dateFrom"

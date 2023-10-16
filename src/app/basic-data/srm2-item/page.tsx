@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ProfileTab } from '@/app/basic-data/srm2-item/profile-tab';
+import { ProfileTab } from '@/app/basic-data/srm2-item/forms/profile-tab';
 
 const BasicDataHomePage = ({ params }: { params: { slug: string[] } }) => {
     return (

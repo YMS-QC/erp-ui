@@ -4,11 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { signIn } from 'next-auth/react';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 
@@ -28,44 +28,49 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const FormSchema = z.object({
     // csrfToken: z.string().default(csrfToken),
-    username: z.string({ required_error: '请填写用户名' }),
-    password: z.string({ required_error: '请填写密码' }),
+    username: z.coerce.string({ required_error: '请填写用户名' }).nonempty(),
+    password: z.coerce.string({ required_error: '请填写密码' }).nonempty(),
 });
 
-export type Props = {
-    className?: string;
-    callbackUrl?: string;
-    error?: string;
-};
+export default function Login() {
+    const [error, setError] = useState({ message: '' });
 
-export default function Login(props: Props) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get('callbackUrl');
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [loginError, setLoginError] = useState(false);
+    // const { data: session } = useSession();
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
+        defaultValues: {},
     });
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
-        setLoginError(false);
-        setIsLoading(true);
-        // const csrfToken: string | null = (await getCsrfToken()) ?? '-';
-        const res = await signIn('credentials', {
-            username: data.username,
-            password: data.password,
-            redirect: false,
-        });
+        const { username, password } = data;
 
-        if (!res?.error) {
-            router.push(props.callbackUrl ?? 'http://localhost:3000');
+        try {
+            const res = await signIn<'credentials'>('credentials', {
+                redirect: Boolean(false),
+                username,
+                password,
+                callbackUrl: callbackUrl || '/',
+            });
+
+            if (!res?.ok && res?.error === 'CredentialsSignin')
+                setError({ message: 'Bad email or password !' });
+
+            if (res?.ok && res?.url) router.push(res?.url);
+        } catch (siginError: any) {
+            setError({ message: siginError.message });
         }
-
-        if (res?.error) setLoginError(true);
-
-        setIsLoading(false);
     }
+
+    useEffect(() => {
+        if (!form.formState.isValid) {
+            form.reset({ username: '', password: '' });
+        }
+    }, []);
 
     // return (
     //     <form method="post" action="/api/auth/callback/credentials">
@@ -91,7 +96,7 @@ export default function Login(props: Props) {
                             <Label className="text-lg font-bold">填写登录信息</Label>
                             <Separator />
 
-                            {loginError && (
+                            {error?.message && (
                                 <Alert variant="destructive">
                                     <ExclamationTriangleIcon className="h-4 w-4" />
                                     <AlertTitle>校验失败</AlertTitle>
@@ -130,7 +135,17 @@ export default function Login(props: Props) {
                             </div>
 
                             <div className="flex flex-col w-full space-x-1">
-                                <Button type="submit" loading={isLoading}>
+                                <Button
+                                    type="submit"
+                                    loading={
+                                        form.formState.isLoading || form.formState.isSubmitting
+                                    }
+                                    disabled={
+                                        !form.formState.isDirty ||
+                                        !form.formState.isValid ||
+                                        form.formState.isSubmitting
+                                    }
+                                >
                                     登录
                                 </Button>
                             </div>

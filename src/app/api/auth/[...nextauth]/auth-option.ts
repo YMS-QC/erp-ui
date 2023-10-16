@@ -53,9 +53,22 @@ export const authOptions: NextAuthOptions = {
 
         async session({ token, session }: { token: any; session: any }) {
             session.user = token.user;
-            session.backendTokens = token.backendTokens;
 
-            session.expires = new Date(token?.backendTokens?.expiresIn);
+            try {
+                if (new Date().getTime() < token?.backendTokens?.expiresIn)
+                    session.backendTokens = token.backendTokens;
+                else {
+                    console.log(`in session refresh accesstoken`);
+                    const newToken = await refreshToken(token);
+                    session.backendTokens = newToken.backendTokens;
+                    token.backendTokens = newToken.backendTokens;
+                }
+
+                session.expires = new Date(token?.backendTokens?.expiresIn);
+                return session;
+            } catch (error) {
+                session.error = error;
+            }
             return session;
         },
     },
