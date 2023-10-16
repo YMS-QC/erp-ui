@@ -5,15 +5,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import dayjs from 'dayjs';
 
 import React, { useState } from 'react';
 
 import { CalendarIcon } from '@radix-ui/react-icons';
 
-import { signIn, useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 
-import { useRouter } from 'next/navigation';
+import dayjs from 'dayjs';
+
+import { usePathname } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -39,49 +40,35 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
-
-const FormSchema = z.object({
-    lookBackDays: z
-        .number()
-        .min(1, { message: '至少回溯一天' })
-        .max(100, { message: '不能超过100天' })
-        .default(7),
-    dateFrom: z
-        .date()
-        .min(dayjs().add(-100, 'day').toDate(), { message: '开始日期不能早于100天前' })
-        .optional(),
-    dateTo: z.date().optional(),
-    // coerce 强制类型装换校验，可以解决select的value是string类型的问题
-    maxUpdateRows: z.coerce.number().default(1000).optional(),
-    transportRowLimit: z.coerce.number().default(10).optional(),
-});
+import ProfileSchema from '@/app/basic-data/schemas/profile';
 
 export function ProfileTab() {
-    const router = useRouter();
+    const pathname = usePathname();
     const { data: session }: { data: any } = useSession();
     const [isLoading, setIsLoading] = useState(false);
 
-    const form = useForm<z.infer<typeof FormSchema>>({
-        resolver: zodResolver(FormSchema),
+    const startUpApiUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}${pathname}/start`;
+    const stopApiUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}${pathname}/stop`;
+
+    const form = useForm<z.infer<typeof ProfileSchema>>({
+        resolver: zodResolver(ProfileSchema),
         defaultValues: {
-            lookBackDays: 7,
+            lookbackDays: 7,
+            sleepSeconds: 30,
         },
     });
 
-    async function onSubmit(formData: z.infer<typeof FormSchema>) {
+    async function onSubmit(formData: z.infer<typeof ProfileSchema>) {
         const getResponse = async () => {
             try {
-                const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/basic-data/srm2/item/start`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            authorization: `Bearer ${session?.backendTokens?.accessToken}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(formData),
+                const res = await fetch(startUpApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        authorization: `Bearer ${session?.backendTokens?.accessToken}`,
+                        'Content-Type': 'application/json',
                     },
-                );
+                    body: JSON.stringify(formData),
+                });
                 const json = await res.json();
 
                 return json;
@@ -106,7 +93,7 @@ export function ProfileTab() {
             });
             // router.replace('/basic-data/srm2-item');
             // router.push('/auth/signin');
-            signIn();
+            signOut();
         } else
             toast({
                 title: '处理失败！',
@@ -122,16 +109,13 @@ export function ProfileTab() {
 
         const getResponse = async () => {
             try {
-                const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/basic-data/srm2/item/stop`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            authorization: `Bearer ${session?.backendTokens?.accessToken}`,
-                            'Content-Type': 'application/json',
-                        },
+                const res = await fetch(stopApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        authorization: `Bearer ${session?.backendTokens?.accessToken}`,
+                        'Content-Type': 'application/json',
                     },
-                );
+                });
                 const json = await res.json();
 
                 return json;
@@ -154,8 +138,7 @@ export function ProfileTab() {
             toast({
                 title: '会话过期需要重新登录',
             });
-            router.replace('/basic-data/srm2-item');
-            router.push('/auth/signin');
+            signOut();
         } else
             toast({
                 title: '处理失败！',
@@ -172,7 +155,7 @@ export function ProfileTab() {
                 <div className="space-y-6 pt-2 pb-6">
                     <FormField
                         control={form.control}
-                        name="lookBackDays"
+                        name="lookbackDays"
                         render={({ field: { value, onChange } }) => (
                             <FormItem>
                                 <FormLabel>回溯{value}天</FormLabel>
@@ -188,6 +171,28 @@ export function ProfileTab() {
                                     />
                                 </FormControl>
                                 <FormDescription>从{value}天开始扫描更新的数据</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="sleepSeconds"
+                        render={({ field: { value, onChange } }) => (
+                            <FormItem>
+                                <FormLabel>运行间隔时间 {value} 秒</FormLabel>
+                                <FormControl>
+                                    <Slider
+                                        min={30}
+                                        max={30 * 2 * 60}
+                                        step={30}
+                                        defaultValue={[value]}
+                                        onValueChange={(vals) => {
+                                            onChange(vals[0]);
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormDescription>间隔{value}秒，运行下次扫描</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
